@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --inspect ./src/index.ts",
+    "start": "nodemon --exec npx ts-node ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,14 +11,34 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.4",
-    "express": "^5.1.0",
-    "nodemon": "^3.1.10",
     "prettier": "^3.6.1",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "cron": "^2.1.0",
+    "debug": "~2.6.9",
+    "dotenv": "^16.0.3",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "kafkajs": "^2.2.4",
+    "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
+    "nodemon": "^2.0.22",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "pg-listen": "^1.7.0",
+    "redis": "^4.6.7",
+    "sequelize": "^6.3.5",
+    "sequelize-paginate": "^1.1.6"
   }
 }
