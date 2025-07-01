@@ -1,7 +1,8 @@
+import { EachMessagePayload } from "kafkajs";
 export interface IEventHandler {
-    handle(data: any): Promise<void>,
-    consumeHandler(): Promise<void>,
+    consumeHandler(data: EachMessagePayload): Promise<void>,
     consumeRegist(): Promise<void>,
+    produce(topic: string): Promise<void>,
 }
 
 export interface IEventMessage {
@@ -10,7 +11,7 @@ export interface IEventMessage {
 }
 
 export abstract class EventHandler implements IEventHandler{
-    abstract handle(data: any): Promise<void>;
-    abstract consumeHandler(): Promise<void>;
+    abstract consumeHandler(data: EachMessagePayload): Promise<void>;
     abstract consumeRegist(): Promise<void>;
+    abstract produce(topic: string): Promise<void>;
 }

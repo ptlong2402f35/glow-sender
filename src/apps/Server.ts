@@ -1,6 +1,6 @@
 require("dotenv").config();
 import http from "http";
-import App from "../app/App";
+import App from "./App";
 import express from "express";
 import debug from "debug";
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;

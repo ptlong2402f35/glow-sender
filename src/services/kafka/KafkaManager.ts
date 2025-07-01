@@ -8,6 +8,7 @@ export default class KafkaManager {
     private kafka: Kafka;
     private producer: Producer;
     private consumer: Consumer;
+    private consumerRegisted: boolean;
 
     public getInstance() {
         if (!KafkaManager.instance) {
@@ -31,6 +32,7 @@ export default class KafkaManager {
             
             if(!this.consumer) 
                 this.consumer = this.kafka.consumer({ groupId: Config.kafka.groupId || ""});
+            this.consumerRegisted = false;
         }
         catch (err) {
             console.error(err);
@@ -53,16 +55,21 @@ export default class KafkaManager {
         await this.producer.disconnect();
     }
 
-    public async consumerTopic(topic: string, handler: IEventHandler) {
+    public async consumerTopic(topics: string[], handler: any) {
         if (!this.consumer) {
             await this.initKafkaComponent();
         }
-        await this.consumer.connect();
-        await this.consumer.subscribe({ topic: topic, fromBeginning: true });
+        if(!this.consumerRegisted) {
+            await this.consumer.connect();
+            this.consumerRegisted = true;
+        }
+        for(let topic of topics) {
+            await this.consumer.subscribe({ topic: topic, fromBeginning: true });
+        }
 
         await this.consumer.run({
             eachMessage: async ({ topic, partition, message }: EachMessagePayload) => {
-                handler.handle({topic, partition, message});
+                handler({topic, partition, message});
             },
         });
     }

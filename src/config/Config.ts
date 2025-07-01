@@ -2,6 +2,7 @@ import "dotenv/config";
 
 export default class Config {
     public static node = process.env.NODE_ENV;
+    public static tagService = process.env.TAG_SERVICE;
 
     public static db = {
         username: this.node === "production" ? process.env.PROD_DB_USERNAME : process.env.DEV_DB_USERNAME,
@@ -26,5 +27,10 @@ export default class Config {
         enableAutoCommit: process.env.KAFKA_ENABLE_AUTO_COMMIT === "true",
         fetchMinBytes: parseInt(process.env.KAFKA_FETCH_MIN_BYTES || "300000"),
         fetchMaxWaitMs: parseInt(process.env.KAFKA_FETCH_MAX_WAIT_MS || "3000"),
+        topics: process.env.KAFKA_TOPICS?.split(";").filter(val => val) || [],
+    }
+
+    public static component = {
+        
     }
 }

@@ -1,5 +1,6 @@
-import { IEventHandler } from "../eventHandler/EventHandler";
 import KafkaManager from "./KafkaManager";
+import Config from "../../config/Config";
+import { EachMessagePayload } from "kafkajs";
 
 export default class KafkaService {
     kafkaManager: KafkaManager;
@@ -16,11 +17,13 @@ export default class KafkaService {
         await admin.disconnect();
     }
 
-    public async consumerRegist(topic: string, handler: IEventHandler) {
-        await this.kafkaManager.consumerTopic(topic, handler);
+    public async initRegistConsumer(handler: (data: EachMessagePayload) => Promise<void>) {
+        await this.kafkaManager.consumerTopic(Config.kafka.topics, handler);
     }
 
     public async produceEvent(topic: string, data: any) {
         await this.kafkaManager.produceMessage(topic, data);
     }
+
+    
 }
