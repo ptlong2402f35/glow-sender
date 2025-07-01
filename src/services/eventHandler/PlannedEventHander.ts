@@ -1,6 +1,10 @@
 import { EventHandler } from "./EventHandler"
 
-export default  class PlannedEventHandler implements EventHandler {
+export default class PlannedEventHandler extends EventHandler {
+    constructor() {
+        super();
+    }
+
     public async  handle(data: any) {
 
     };
@@ -10,6 +14,6 @@ export default  class PlannedEventHandler implements EventHandler {
     };
 
     public async consumeRegist() {
-        
+
     }
 }
