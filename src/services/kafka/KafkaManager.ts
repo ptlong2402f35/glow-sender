@@ -1,73 +1,74 @@
-import { group } from "console";
 import { Kafka, Producer, Consumer, EachMessagePayload } from "kafkajs";
 
-const KafkaClientId = process.env.KAFKA_CLIENT_ID || null;
-const KafkaGroupId = process.env.KAFKA_GROUP_ID || null;
+import Config from "../../config/Config";
+import { IEventHandler, IEventMessage } from "../eventHandler/EventHandler";
 
 export default class KafkaManager {
-    private static instance: Kafka;
+    private static instance: KafkaManager;
+    private kafka: Kafka;
     private producer: Producer;
     private consumer: Consumer;
 
     public getInstance() {
         if (!KafkaManager.instance) {
-            this.init();
+            KafkaManager.instance = new KafkaManager();
         }
         return KafkaManager.instance;
     }
 
-    public init() {
-        KafkaManager.instance = new Kafka({
-            // clientId: process.env.KAFKA_CLIENT_ID,
-            brokers: ["34.142.186.189:29092"],
+    public async init() {
+        this.kafka = new Kafka({
+            clientId: Config.kafka.clientId,
+            brokers: Config.kafka.brokers,
         });
-        this.producer = KafkaManager.instance.producer();
-
+        await this.initKafkaComponent();
     }
 
-    public produceMessage(topic: string, message: string) {
-        if (!this.producer) {
-            this.produceConnect();
-        }
-        return this.producer.send({
-            topic: topic,
-            messages: [
-                { value: 'test!' },
-            ],
-        });
-    }
-
-    private async produceConnect() {
+    private async initKafkaComponent() {
         try {
-            if (!this.producer) {
-                this.producer = KafkaManager.instance.producer();
-            }
-            await this.producer.connect();
+            if (!this.producer)
+                this.producer = this.kafka.producer();
+            
+            if(!this.consumer) 
+                this.consumer = this.kafka.consumer({ groupId: Config.kafka.groupId || ""});
         }
         catch (err) {
             console.error(err);
         }
     }
 
-    private async produceDisconnect() {
-        if (this.producer) {
-            await this.producer.disconnect();
-        }
+    public async getKafkaInstance() {
+        return this.kafka;
     }
 
-    public async consumerTopic(topic: string) {
+    public async produceMessage(topic: string, data: IEventMessage[]) {
+        if (!this.producer) {
+            await this.initKafkaComponent();
+        }
+        await this.producer.connect();
+        await this.producer.send({
+            topic: topic,
+            messages: data,
+        });
+        await this.producer.disconnect();
+    }
+
+    public async consumerTopic(topic: string, handler: IEventHandler) {
         if (!this.consumer) {
-            this.consumer = KafkaManager.instance.consumer({ groupId: KafkaGroupId || ""});
+            await this.initKafkaComponent();
         }
         await this.consumer.connect();
-        await this.consumer.subscribe({ topic: 'topic', fromBeginning: true });
+        await this.consumer.subscribe({ topic: topic, fromBeginning: true });
 
         await this.consumer.run({
             eachMessage: async ({ topic, partition, message }: EachMessagePayload) => {
-                console.log({
-                value: message.value?.toString(),
-                })
+                handler.handle({topic, partition, message});
             },
         });
+    }
+
+    public async disconnect() {
+        console.log("Disconnect kafka.....");
+        await this.consumer.disconnect();
     }
 }

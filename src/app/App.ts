@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import logger from 'morgan';
+import KafkaManager from '../services/kafka/KafkaManager';
+import KafkaService from '../services/kafka/KafkaService';
 var cookieParser = require("cookie-parser");
 var createError = require("http-errors");
 
@@ -50,24 +52,26 @@ export default class App {
   }
 
   public async stop() {
-    this.stopJob();
-    this.stopService();
+    await this.stopJob();
+    await this.stopService();
+    process.exit(0);
   }
 
   public startJob() {
     
   }
 
-  public stopJob() {
+  public async stopJob() {
 
   }
 
-  public startService() {
-
+  public async startService() {
+    await new KafkaManager().getInstance().init();
+    await new KafkaService().getKafkaTopic();
   }
 
-  public stopService() {
-
+  public async stopService() {
+    await new KafkaManager().getInstance().disconnect();
   }
 
 }
