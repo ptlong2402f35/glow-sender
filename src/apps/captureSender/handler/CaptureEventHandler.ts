@@ -25,8 +25,8 @@ export default class CaptureEventHandler extends EventHandler {
         await this.kafkaService.initRegistConsumer(this.consumeHandler);
     }
 
-    public async produce(topic: string) {
-        let message = await this.captureHandler.produceTreatmentRuler();
+    public async produce(topic: string, data: any) {
+        let message = await this.captureHandler.produceTreatmentRuler(topic, data);
         await this.kafkaService.produceEvent(topic, message);
     }
 }

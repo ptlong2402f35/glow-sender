@@ -33,4 +33,8 @@ export default class Config {
     public static component = {
         
     }
+
+    public static watcher = {
+        maxConnection: process.env.WATCHER_MAX_CONNECTION || 2,
+    }
 }
