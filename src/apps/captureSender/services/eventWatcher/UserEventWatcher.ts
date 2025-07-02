@@ -2,7 +2,7 @@ import CaptureEventHandler from "../../handler/CaptureEventHandler";
 import EventWatcher from "./EventWatcher";
 import PGWatcher from "./PGWatcher";
 const UserRegisterKafkaTopic = process.env.USER_REGISTER_KAFKA_TOPIC || "sign_up";
-const UserRegisterEventChannel = process.env.USER_REGISTER_EVENT_CHANNEL || "user-register-event"; 
+const UserRegisterEventChannel = process.env.USER_REGISTER_EVENT_CHANNEL || "user-event-regist"; 
 
 export default class UserEventWatcher extends EventWatcher{
     static instance: UserEventWatcher;
@@ -16,6 +16,13 @@ export default class UserEventWatcher extends EventWatcher{
         this.pgWatcher = new PGWatcher().getInstance();
     }
 
+    getInstance() {
+         if(!UserEventWatcher.instance) {
+            UserEventWatcher.instance = new UserEventWatcher();
+        }
+        return UserEventWatcher.instance;
+    }
+
     async init() {
         await this.pgWatcher.register(UserRegisterEventChannel, this.handle);
         this.startState = true;
@@ -27,6 +34,7 @@ export default class UserEventWatcher extends EventWatcher{
     }
 
     async handle(payload: string): Promise<void> {
+        console.log("start state ***===", this.startState);
         if(!this.startState) return;
 
         console.log(`==== [UserEventWatcher][handle] payload: `, payload);

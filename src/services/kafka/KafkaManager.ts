@@ -56,6 +56,8 @@ export default class KafkaManager {
     }
 
     public async consumerTopic(topics: string[], handler: any) {
+        console.log("topic regist", topics);
+        console.log("topic handler", handler);
         if (!this.consumer) {
             await this.initKafkaComponent();
         }

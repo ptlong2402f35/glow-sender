@@ -20,21 +20,21 @@ export default class Config {
     };
 
     public static kafka = {
-        clientId: process.env.KAFKA_CLIENT_ID || "treatment-ruler-app",
+        clientId: process.env.KAFKA_CLIENT_ID || "capture-sender-app",
         brokers: process.env.KAFKA_BROKERS?.split(",") || ["localhost:9094"],
         groupId: process.env.KAFKA_GROUP_ID || "treatment-ruler-group",
         autoOffsetReset: process.env.KAFKA_AUTO_OFFSET_RESET || "earliest",
         enableAutoCommit: process.env.KAFKA_ENABLE_AUTO_COMMIT === "true",
         fetchMinBytes: parseInt(process.env.KAFKA_FETCH_MIN_BYTES || "300000"),
         fetchMaxWaitMs: parseInt(process.env.KAFKA_FETCH_MAX_WAIT_MS || "3000"),
-        topics: process.env.KAFKA_TOPICS?.split(";").filter(val => val) || [],
+        topics: process.env.KAFKA_TOPICS?.split(";").filter(val => val) || ["talkshow"],
     }
 
-    public static component = {
-        
+    public static module = {
+        serviceTagName: process.env.SERVICE_TAG_NAME 
     }
 
     public static watcher = {
-        maxConnection: process.env.WATCHER_MAX_CONNECTION || 2,
+        maxConnection: process.env.DB_WATCHER_MAX_CONNECTION || 2,
     }
 }

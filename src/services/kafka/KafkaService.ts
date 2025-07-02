@@ -1,6 +1,7 @@
 import KafkaManager from "./KafkaManager";
 import Config from "../../config/Config";
 import { EachMessagePayload } from "kafkajs";
+import { IEventMessage } from "../eventHandler/EventHandler";
 
 export default class KafkaService {
     kafkaManager: KafkaManager;
@@ -21,7 +22,7 @@ export default class KafkaService {
         await this.kafkaManager.consumerTopic(Config.kafka.topics, handler);
     }
 
-    public async produceEvent(topic: string, data: any) {
+    public async produceEvent(topic: string, data: IEventMessage[]) {
         await this.kafkaManager.produceMessage(topic, data);
     }
 

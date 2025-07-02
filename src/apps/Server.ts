@@ -1,4 +1,3 @@
-require("dotenv").config();
 import http from "http";
 import App from "./App";
 import express from "express";

@@ -5,9 +5,14 @@ import path from 'path';
 import logger from 'morgan';
 import KafkaManager from '../services/kafka/KafkaManager';
 import KafkaService from '../services/kafka/KafkaService';
-var cookieParser = require("cookie-parser");
-var createError = require("http-errors");
-
+import cookieParser from "cookie-parser";
+import createError from "http-errors";
+import db from '../models/index';
+import Config from '../config/Config'; 
+import CaptureEventHandler from './captureSender/handler/CaptureEventHandler';
+import PGWatcher from './captureSender/services/eventWatcher/PGWatcher';
+import UserEventWatcher from './captureSender/services/eventWatcher/UserEventWatcher';
+const ServiceTagName = Config.module.serviceTagName;
 export default class App {
   public static instance: express.Application;
 
@@ -40,6 +45,13 @@ export default class App {
     App.instance.use(function (req, res, next) {
       next(createError(404));
     });
+    db.sequelize.authenticate()
+      .then(() => {
+        console.log('Connection to DB has been established successfully.');
+      })
+      .catch((err: any) => {
+        console.error('Unable to connect to the database:', err);
+      });
   }
 
   public start() {
@@ -67,6 +79,14 @@ export default class App {
 
   public async startService() {
     await new KafkaManager().getInstance().init();
+    await new PGWatcher().getInstance().init();
+    switch (ServiceTagName) {
+      case "Captured-sender-module": {
+        await new UserEventWatcher().getInstance().init();
+        await new CaptureEventHandler().consumeRegist();
+        break;
+      }
+    }
     await new KafkaService().getKafkaTopic();
   }
 

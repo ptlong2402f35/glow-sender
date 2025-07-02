@@ -14,10 +14,18 @@ export default class CaptureEventHandler extends EventHandler {
     }
 
     public async consumeHandler(data: EachMessagePayload) {
-        switch(data?.topic) {
-            default: {
-                console.log(`Consumer ${data.topic}: ===`, data);
+        try {
+            switch(data?.topic) {
+                default: {
+                    console.log(`Consumer ${data.topic}: ===`, {
+                        key: data.message.key?.toString(),
+                        value: JSON.parse(data.message.value?.toString() || "") || "",
+                    });
+                }
             }
+        }
+        catch (err) {
+            console.error(err);
         }
     };
 
