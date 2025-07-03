@@ -18,8 +18,8 @@ export default class KafkaService {
         await admin.disconnect();
     }
 
-    public async initRegistConsumer(handler: (data: EachMessagePayload) => Promise<void>) {
-        await this.kafkaManager.consumerTopic(Config.kafka.topics, handler);
+    public async initRegistConsumer(topics: string[], handler: (data: EachMessagePayload) => Promise<void>) {
+        await this.kafkaManager.consumerTopic(topics, handler);
     }
 
     public async produceEvent(topic: string, data: IEventMessage[]) {

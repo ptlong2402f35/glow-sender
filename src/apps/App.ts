@@ -12,7 +12,11 @@ import Config from '../config/Config';
 import CaptureEventHandler from './captureSender/handler/CaptureEventHandler';
 import PGWatcher from './captureSender/services/eventWatcher/PGWatcher';
 import UserEventWatcher from './captureSender/services/eventWatcher/UserEventWatcher';
-const ServiceTagName = Config.module.serviceTagName;
+import { GeneralRedisClient } from '~/services/redis/GeneralRedisClient';
+import { OnboardingEventProcessor } from './plannedSender/services/plannedEvent/processor/OnboardingEventProcessor';
+import PlannedEventHandler from './plannedSender/handler/PlannedEventHandler';
+import TriggerFunctionEventHandler from './triggerFunction/handler/TriggerFunctionEventHandler';
+const ModuleTagName = Config.module.moduleTagName;
 export default class App {
   public static instance: express.Application;
 
@@ -80,10 +84,23 @@ export default class App {
   public async startService() {
     await new KafkaManager().getInstance().init();
     await new PGWatcher().getInstance().init();
-    switch (ServiceTagName) {
-      case "Captured-sender-module": {
+    await new GeneralRedisClient().getInstance().getClient();
+    switch (ModuleTagName) {
+      case "captured-sender-module": {
         await new UserEventWatcher().getInstance().init();
-        await new CaptureEventHandler().consumeRegist();
+        // await new CaptureEventHandler().consumeRegist();
+        
+        break;
+      }
+      case "planned-treatment-module": {
+        await new OnboardingEventProcessor().getInstance().init();
+        await new PlannedEventHandler().consumeRegist();
+
+        break;
+      }
+      case "trigger-function-module": {
+        await new TriggerFunctionEventHandler().consumeRegist();
+
         break;
       }
     }

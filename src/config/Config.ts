@@ -27,11 +27,17 @@ export default class Config {
         enableAutoCommit: process.env.KAFKA_ENABLE_AUTO_COMMIT === "true",
         fetchMinBytes: parseInt(process.env.KAFKA_FETCH_MIN_BYTES || "300000"),
         fetchMaxWaitMs: parseInt(process.env.KAFKA_FETCH_MAX_WAIT_MS || "3000"),
-        topics: process.env.KAFKA_TOPICS?.split(";").filter(val => val) || ["talkshow"],
+    }
+
+    public static onesignal = {
+        ONESIGNAL_APP_ID: process.env.CUSTOMER_ONESIGNAL_APP_ID || "",
+        ONESIGNAL_REST_API_KEY: process.env.CUSTOMER_ONESIGNAL_REST_API_KEY || "",
+        ANDROID_APP_ID: process.env.ANDROID_APP_ID || ""
     }
 
     public static module = {
-        serviceTagName: process.env.SERVICE_TAG_NAME 
+        moduleTagName: process.env.MODULE_TAG_NAME,
+        consumeTopics: process.env.KAFKA_CONSUME_TOPICS?.split(";").filter(val => val) || ["treatment-event-send"],
     }
 
     public static watcher = {

@@ -1,30 +1,24 @@
 import { EachMessagePayload } from "kafkajs";
 import { EventHandler, EventTopic } from "../../../services/eventHandler/EventHandler";
 import KafkaService from "../../../services/kafka/KafkaService";
-import CaptureHandler from "./CaptureHandler";
+import PlannedHandler from "./PlannedHandler";
 import Config from "../../../config/Config";
 const ConsumeTopics = Config.module.consumeTopics;
-export default class CaptureEventHandler extends EventHandler {
+
+export default class PlannedEventHandler extends EventHandler {
     protected kafkaService: KafkaService;
-    protected captureHandler: CaptureHandler;
+    protected plannedHandler: PlannedHandler;
     constructor() {
         super();
         this.kafkaService = new KafkaService();
-        this.captureHandler = new CaptureHandler();
+        this.plannedHandler = new PlannedHandler();
     }
     //process consume action when register to a topic
     public async consumeHandler(data: EachMessagePayload) {
         try {
             let parseValue = this.decodeMessage(data);
             if(!parseValue) return;
-            switch(data?.topic) {
-                default: {
-                    console.log(`Consumer ${data.topic}: ===`, {
-                        key: data.message.key?.toString(),
-                        value: JSON.parse(data.message.value?.toString() || "") || "",
-                    });
-                }
-            }
+            await this.plannedHandler.consumeProcess(data, parseValue);
         }
         catch (err) {
             console.error(err);
@@ -36,10 +30,8 @@ export default class CaptureEventHandler extends EventHandler {
     }
     //produce action
     public async produce(topic: string, data: Record<string, string>, type?: string) {
-        console.log("init process", topic);
-        console.log("init process", data);
-        let message = await this.captureHandler.produceTreatmentRuler(topic, data, type);
-        console.log("Message to push", message);
+        let message = await this.plannedHandler.produceProcess(topic, data, type);
+        console.log(` ==== [Message push] to topic: ${topic}`, message);
         if(!message) return;
         await this.kafkaService.produceEvent(topic, message);
     }

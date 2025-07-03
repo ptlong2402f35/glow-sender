@@ -1,3 +1,4 @@
+import { EventTopic } from "../../../../services/eventHandler/EventHandler";
 import CaptureEventHandler from "../../handler/CaptureEventHandler";
 import EventWatcher from "./EventWatcher";
 import PGWatcher from "./PGWatcher";
@@ -9,23 +10,24 @@ export default class UserEventWatcher extends EventWatcher{
     pgWatcher: PGWatcher;
     startState: boolean;
     captureEventHandler: CaptureEventHandler;
-    kafkaTopic: string = UserRegisterKafkaTopic;
 
     constructor() {
         super();
         this.pgWatcher = new PGWatcher().getInstance();
+        this.captureEventHandler = new CaptureEventHandler();
     }
 
     getInstance() {
-         if(!UserEventWatcher.instance) {
+        if(!UserEventWatcher.instance) {
             UserEventWatcher.instance = new UserEventWatcher();
         }
         return UserEventWatcher.instance;
     }
 
     async init() {
-        await this.pgWatcher.register(UserRegisterEventChannel, this.handle);
+        await this.pgWatcher.register(UserRegisterEventChannel, async (payload: string) => await this.handle(payload));
         this.startState = true;
+        console.log("=== register done init ===", this.startState)
     }
 
     async stop(): Promise<void> {
@@ -42,9 +44,10 @@ export default class UserEventWatcher extends EventWatcher{
         let strParts = payload?.split("|") || [];
         for(let strPart of strParts) {
             try {
-                let event = this.decode(strPart, this.decodePayload);
+                console.log("this.decode", this.decode);
+                let event = this.decode(strPart, (payload: string) => this.decodePayload(payload));
                 if(!event) continue;
-                this.captureEventHandler.produce(this.kafkaTopic, event);
+                this.captureEventHandler.produce(EventTopic.CapturedToRuler, event);
             }
             catch(err) {
                 console.error(err);
@@ -53,7 +56,7 @@ export default class UserEventWatcher extends EventWatcher{
     }
 
 
-    async decodePayload(payload: string) {
+    decodePayload(payload: string) {
         let ret: Record<any, any> = {
             createdAt: new Date(),
         };
@@ -77,5 +80,6 @@ export default class UserEventWatcher extends EventWatcher{
             }
         }
 
+        return ret;
     }
 }
